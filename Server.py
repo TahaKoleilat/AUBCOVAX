@@ -11,7 +11,7 @@ MedicalPersonnel = DataBase["Medical Personnel"]
 Patient = DataBase["Patient"]
 Admin = DataBase["Admin"]
 IP = "0.0.0.0"
-Port   = int(os.environ.get('PORT', 8000))
+Port   = 8000
 bufferSize  = 1024
 Socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 Socket.bind((IP, Port))
