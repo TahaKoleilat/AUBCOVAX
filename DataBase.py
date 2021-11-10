@@ -22,4 +22,3 @@ def saveAdmin(username, password):
     password_encrypted = generate_password_hash(password)
     Admin.insert_one(
         {'username': username, 'password': password_encrypted})
-print(os.environ.get('PORT', 8000))
