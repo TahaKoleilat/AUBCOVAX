@@ -1,6 +1,6 @@
 import socket
 import os
-from DataBase import savePatient
+from DataBase import savePatient, send_mail
 from werkzeug.security import generate_password_hash,check_password_hash
 from pymongo import MongoClient
 
@@ -65,6 +65,8 @@ while(True):
                         phoneNumber.decode(), email.decode(), location.decode(),
                         medicalConditions.decode(), username.decode(), password.decode())
             Socket.sendto(str.encode("Sign Up Successful"),type[1])
+            timeslot = "Monday, November 15, 2021 at 8:00 AM" #implement getting the timeslot here
+            send_mail("AUBCOVAX@gmail.com","AUBCOVAX123@#", email.decode(),fullName.decode(),timeslot,"AUBCOVAX Dose 1 Date Confirmation")
     #elif(action.decode()=="Forgot Password"): optional/implement later if we still have time
     else:
         Socket.sendto(str.encode("Invalid request"),type[1])
