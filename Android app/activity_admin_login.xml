@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:background="@drawable/login_bg"
+    android:padding="26dp"
+    tools:context=".AdminLogin"
+    tools:visibility="visible">
+
+
+    <TextView
+        android:id="@+id/textAdminLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="61dp"
+        android:layout_marginTop="100dp"
+        android:layout_marginEnd="71dp"
+        android:elevation="10dp"
+        android:fontFamily="@font/habibi"
+        android:text="Admin Login"
+        android:textColor="#000000"
+        android:textSize="48sp"
+        android:typeface="sans"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/editUsernameAdmin"
+        android:layout_width="225dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="120dp"
+        android:background="@drawable/box"
+        android:drawableStart="@drawable/ic_baseline_account_circle_24"
+        android:drawableLeft="@drawable/ic_baseline_account_circle_24"
+        android:drawablePadding="5dp"
+        android:ems="10"
+        android:hint="Enter Username"
+        android:imeOptions="actionNext"
+        android:inputType="textPersonName"
+        android:textColor="#000000"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.451"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textAdminLogin"
+        tools:visibility="visible" />
+
+
+
+    <Button
+        android:id="@+id/btnSigninAdmin"
+        android:layout_width="140dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="121dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginEnd="150dp"
+        android:background="@drawable/bordershape"
+        android:foreground="?attr/selectableItemBackground"
+        android:text="Sign In"
+        android:onClick="send"
+        android:textAllCaps="false"
+        app:backgroundTint="#000000"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout2" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:hint="Enter Password"
+        android:visibility="visible"
+        app:hintEnabled="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.45"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editUsernameAdmin"
+        app:passwordToggleEnabled="true"
+        app:startIconDrawable="@drawable/ic_baseline_lock_24"
+        tools:visibility="visible">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/textinputedittextpasswordAdmin"
+            android:layout_width="225dp"
+            android:layout_height="50dp"
+            android:background="@drawable/box"
+            android:imeOptions="actionDone"
+            android:textColor="#000000" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:id="@+id/responseText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#FF0505"
+        app:layout_constraintBottom_toTopOf="@+id/editUsernameAdmin"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textAdminLogin"
+        app:layout_constraintVertical_bias="0.821" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
