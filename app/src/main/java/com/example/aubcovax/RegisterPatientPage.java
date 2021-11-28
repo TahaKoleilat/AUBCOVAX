@@ -52,7 +52,7 @@ public class RegisterPatientPage extends AppCompatActivity {
         String code = CountryCode.getSelectedCountryCode();
         String country = CountryLocation.getSelectedCountryEnglishName();
         String city = edtCity.getText().toString();
-        String location = city + " " + country;
+        String location = city + "," + country;
         String phonenumber = "+" + code + " " + edtphonenumber.getText().toString();
         String email = edtemail.getText().toString();
         String IDnumber = edtIDnumber.getText().toString();
@@ -75,7 +75,7 @@ public class RegisterPatientPage extends AppCompatActivity {
                 PrintWriter writer = new PrintWriter(output, true);
                 String action = "Sign Up";
                 String type = "Patient";
-                writer.println(action +","+type+","+username+","+password1+","+fullname+","+birthDate+","+IDnumber+","+phonenumber+","+email+","+location+","+medicalconditions+",");
+                writer.println(action +"$"+type+"$"+username+"$"+password1+"$"+fullname+"$"+birthDate+"$"+IDnumber+"$"+phonenumber+"$"+email+"$"+location+"$"+medicalconditions+"$");
                 InputStream input = socket.getInputStream();
                 byte[] buffer = new byte[1024];
                 int read;

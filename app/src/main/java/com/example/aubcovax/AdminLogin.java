@@ -51,7 +51,7 @@ public class AdminLogin extends AppCompatActivity {
                 PrintWriter writer = new PrintWriter(output, true);
                 String action = "Sign In";
                 String type = "Admin";
-                writer.println(action +","+type+","+username+","+password+",");
+                writer.println(action +"$"+type+"$"+username+"$"+password+"$");
                 InputStream input = socket.getInputStream();
                 byte[] buffer = new byte[1024];
                 int read;

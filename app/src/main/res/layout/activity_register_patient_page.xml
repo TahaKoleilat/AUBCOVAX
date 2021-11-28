@@ -262,6 +262,7 @@
             android:layout_width="350dp"
             android:layout_height="50dp"
             android:background="@drawable/box"
+            android:inputType="textPassword"
             android:imeOptions="actionNext"
             android:textColor="#000000" />
     </com.google.android.material.textfield.TextInputLayout>
@@ -288,6 +289,7 @@
             android:layout_width="350dp"
             android:layout_height="50dp"
             android:background="@drawable/box"
+            android:inputType="textPassword"
             android:imeOptions="actionNext"
             android:textColor="#000000" />
     </com.google.android.material.textfield.TextInputLayout>

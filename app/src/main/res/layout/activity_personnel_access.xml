@@ -6,16 +6,16 @@
     android:layout_height="match_parent"
     android:background="@drawable/login_bg"
     android:padding="26dp"
-    tools:context=".PersonnelLogin"
+    tools:context=".PersonnelAccess"
     tools:visibility="visible">
 
 
     <TextView
-        android:id="@+id/textPersonnelAccess"
+        android:id="@+id/textPersonnelAccessTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="61dp"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="60dp"
         android:layout_marginEnd="71dp"
         android:elevation="10dp"
         android:fontFamily="@font/habibi"
@@ -26,5 +26,69 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+    <EditText
+        android:id="@+id/searchDataBasePersonnel"
+        android:layout_width="250dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="40dp"
+        android:background="@drawable/box"
+        android:elevation="10dp"
+        android:fontFamily="@font/habibi"
+        android:hint="Search Personnel or Patient"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        android:typeface="sans"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textPersonnelAccessTitle" />
+
+    <Button
+        android:id="@+id/searchButtonPersonnel"
+        android:layout_width="55dp"
+        android:layout_height="65dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="32dp"
+        android:backgroundTint="@color/black"
+        android:drawableLeft="@drawable/ic_baseline_search_24"
+        android:foreground="?attr/selectableItemBackground"
+        android:textAllCaps="false"
+        app:backgroundTint="#000000"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.285"
+        android:onClick="PersonnelSearch"
+        app:layout_constraintStart_toEndOf="@+id/searchDataBasePersonnel"
+        app:layout_constraintTop_toBottomOf="@+id/textPersonnelAccessTitle" />
+
+    <Button
+        android:id="@+id/btnBookDose2Personnel"
+        android:layout_width="140dp"
+        android:layout_height="40dp"
+        android:layout_marginBottom="50dp"
+        android:background="@drawable/bordershape"
+        android:foreground="?attr/selectableItemBackground"
+        android:onClick="Book"
+        android:text="Book"
+        android:textAllCaps="false"
+        app:backgroundTint="#000000"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/txtsearchPatientPersonnel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/box"
+        android:textColor="@color/black"
+        android:textSize="16dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/btnBookDose2Personnel"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/searchDataBasePersonnel" />
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

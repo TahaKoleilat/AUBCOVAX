@@ -22,8 +22,6 @@ public class AdminAccess extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_access);
     }
-    public final static int SERVICE_PORT = 8000;
-
     public void search(View view) {
         EditText edtSearchField = findViewById(R.id.searchDataBase);
         String searchobject = edtSearchField.getText().toString();
@@ -35,7 +33,7 @@ public class AdminAccess extends AppCompatActivity {
                 PrintWriter writer = new PrintWriter(output, true);
                 String action = "Search";
                 String type = "Admin";
-                writer.println(action +","+type+","+searchobject+",");
+                writer.println(action +"$"+type+"$"+searchobject+"$");
                 InputStream input = socket.getInputStream();
                 byte[] buffer = new byte[1024];
                 int read;

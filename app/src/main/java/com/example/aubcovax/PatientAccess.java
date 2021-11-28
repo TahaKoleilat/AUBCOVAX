@@ -29,7 +29,7 @@ public class PatientAccess extends AppCompatActivity {
                 PrintWriter writer = new PrintWriter(output, true);
                 String action = "Search";
                 String type = "Patient";
-                writer.println(action +","+type+","+username+",");
+                writer.println(action +"$"+type+"$"+username+"$");
                 InputStream input = socket.getInputStream();
                 byte[] buffer = new byte[1024];
                 int read;

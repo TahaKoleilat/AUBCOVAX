@@ -48,7 +48,7 @@ public class PersonnelLogin extends AppCompatActivity {
                     PrintWriter writer = new PrintWriter(output, true);
                     String action = "Sign In";
                     String type = "Medical Personnel";
-                    writer.println(action +","+type+","+username+","+password+",");
+                    writer.println(action +"$"+type+"$"+username+"$"+password+"$");
                     InputStream input = socket.getInputStream();
                     byte[] buffer = new byte[1024];
                     int read;
