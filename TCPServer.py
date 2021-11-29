@@ -1,7 +1,7 @@
 import socket, threading
 import socket
 import os
-from DataBase import savePatient, send_mail_dose1,send_mail_dose2,send_mail_cert
+from DataBase import savePatient, send_mail_dose1,send_mail_dose2,send_mail_cert, timeslot_dose, compare_time
 from werkzeug.security import generate_password_hash,check_password_hash
 from pymongo import MongoClient
 
@@ -11,6 +11,7 @@ DataBase = client["DataBase"]
 MedicalPersonnel = DataBase["Medical Personnel"]
 Patient = DataBase["Patient"]
 Admin = DataBase["Admin"]
+Timeslot= DataBase["TimeSlots"]
 class ClientThread(threading.Thread):
     def __init__(self,clientAddress,Socket,bufferSize):
         threading.Thread.__init__(self)
@@ -19,7 +20,7 @@ class ClientThread(threading.Thread):
         print ("New connection added: ", clientAddress)
     def run(self):
         data = self.Socket.recv(self.bufferSize).decode("utf-8")
-        data = data.split(",")
+        data = data.split("$")
         action = data[0]
         type = data[1]
         if(action == "Sign In"):
@@ -65,7 +66,7 @@ class ClientThread(threading.Thread):
             if (Patient.count_documents({"username": username}) != 0):
                 self.Socket.send(str.encode("This username already exists!"))
             else:
-                timeslot = "Monday, November 15, 2021 at 8:00 AM" #implement getting the timeslot here
+                timeslot = timeslot_dose()
                 savePatient(fullName, birthDate, ID,
                             phoneNumber, email, location,
                             medicalConditions, username, password,timeslot,"")
@@ -91,30 +92,29 @@ class ClientThread(threading.Thread):
                     user = Patient.find_one({"Phone Number":search_object})
                     self.Socket.send(str.encode("Full Name: " + user["Full name"] + "\n\n" + "ID: " + user["ID"] + "\n\n" + "Email: " + user["Email"] + "\n\n" + "Phone Number: " + user["Phone Number"] + "\n\n" +  "Location: " + user["Location"] + "\n\n" + "Birth Date: " + user["Birth Date"] + "\n\n" + "Medical Conditions: " + user["Medical Conditions"] + "\n\n" + "Dose 1: " + user["Dose 1"] + "\n" + "Dose 2: " + user["Dose 2"] + "\n\n")) 
             elif(type == "Personnel"):
-                if(Patient.count_documents({"Phone Number": search_object}) != 0):
-                    self.Socket.send(str.encode("This patient doesn't exists!")) 
+                if(Patient.count_documents({"Phone Number": search_object}) == 0):
+                    self.Socket.send(str.encode("This patient doesn't exist!")) 
                 else:
                     user = Patient.find_one({"Phone Number":search_object})
-                    self.Socket.send(str.encode("Dose 1: " + user["Dose 1"] + "\n" + "Dose 2: " + user["Dose 2"] + "\n\n")) 
+                    self.Socket.send(str.encode("Full Name: " + user["Full name"] + "\n\n" + "Dose 1: " + user["Dose 1"] + "\n\n"+ "Dose 2: " + user["Dose 2"] + "\n\n" )) 
             elif(type =="Patient"):
                 user = Patient.find_one({"username":search_object})
-                self.Socket.send(str.encode("Full Name: " + user["Full name"] + "\n\n" + "Username: " + user["username"] + "\n\n"+ "ID: " + user["ID"] + "\n\n" + "Email: " + user["Email"] + "\n\n" + "Phone Number: " + user["Phone Number"] + "\n\n" +  "Location: " + user["Location"] + "\n\n" + "Birth Date: " + user["Birth Date"] + "\n\n" + "Medical Conditions: " + user["Medical Conditions"] + "\n\n" + "Dose 1: " + user["Dose 1"] + "\n\n" + "Dose 2: " + user["Dose 2"] + "\n\n" )) 
+                self.Socket.send(str.encode("Full Name: " + user["Full name"] + "\n\n" + "Username: " + user["username"] + "\n\n"+ "ID: " + user["ID"] + "\n\n" + "Email: " + user["Email"] + "\n\n" + "Phone Number: " + user["Phone Number"] + "\n\n" +  "Location: " + user["Location"] + "\n\n" + "Birth Date: " + user["Birth Date"] + "\n\n" + "Medical Conditions: " + user["Medical Conditions"] + "\n\n" + "Dose 1: " + user["Dose 1"] + "\n\n" + "Dose 2: " + user["Dose 2"] + "\n\n" ))    
         elif(action == "Book"):
-            print("1")
-        # elif(action == "sendAvailableTimeout"):
-        #     #implement TimeSlots and Admin/Personnel Access Pages
-        #     if(type == "Personnel"):
-        #         send_dose2 = self.Socket.recv(self.bufferSize).decode("utf-8")
-        #         if(send_dose2 == "Yes" and send_cert == "No"):
-        #             timeslot = "Monday, November 15, 2021 at 8:00 AM" #implement getting the timeslot here
-        #             send_mail_dose2("AUBCOVAX@gmail.com","AUBCOVAX123@#", email,fullName,timeslot,"AUBCOVAX Dose 2 Date Confirmation")
-        #         elif(send_dose2 == "No" and send_cert == "Yes"):
-        #             timeslot = "Monday, November 15, 2021 at 8:00 AM" #implement getting the timeslot here
-        #             send_mail_cert("AUBCOVAX@gmail.com","AUBCOVAX123@#", email,fullName,timeslot,"AUBCOVAX Dose 2 Date Confirmation")
-        #     else:
-        #         self.Socket.send(str.encode("Invalid request"))
-        #elif(sendAvailableTimeout):
-            #implement TimeSlots and Admin/Personnel Access Pages
+            search_object = data[2]
+            user = Patient.find_one({"Phone Number":search_object})
+            if(user["Dose 2"] != ""):
+                self.Socket.send(str.encode("This patient already took Dose 2!"))
+            elif(compare_time(user["Dose 1"]) == "higher"):
+                self.Socket.send(str.encode("This patient didn't take Dose 1 yet!"))
+            else:
+                timeslot = timeslot_dose()
+                parameter = {"Phone Number": search_object}
+                new = { "$set": { "Dose 2": timeslot }}
+                Patient.update_one(parameter, new)
+                user = Patient.find_one({"Phone Number":search_object})
+                self.Socket.send(str.encode("Full Name: " + user["Full name"] + "\n\n" + "Dose 1: " + user["Dose 1"] + "\n\n"+ "Dose 2: " + user["Dose 2"] + "\n\n" )) 
+                send_mail_dose2("AUBCOVAX@gmail.com","AUBCOVAX123@#", user["Email"],user["Full name"],timeslot,"AUBCOVAX Dose 2 Date Confirmation")
         self.Socket.close()
 IP = "0.0.0.0"
 PORT = 3389
