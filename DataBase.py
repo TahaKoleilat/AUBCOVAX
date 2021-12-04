@@ -1,12 +1,21 @@
 from werkzeug.security import generate_password_hash,check_password_hash
 from pymongo import MongoClient
 import smtplib
-from datetime import datetime, timedelta,date
+import time
 import pytz
+import os, io
+from datetime import datetime, timedelta,date
+from reportlab.lib.enums import TA_JUSTIFY
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+import os
+import sys
 from email.mime.text import MIMEText
-
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
 client = MongoClient("mongodb+srv://Admin:admin@aubcovax.h441n.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
-
 DataBase = client["DataBase"]
 MedicalPersonnel = DataBase["Medical Personnel"]
 Patient = DataBase["Patient"]
@@ -43,13 +52,21 @@ def send_mail_dose2(sender,password,receiver,receiver_name,timeslot,subject):
     message['To'] = receiver
     server.sendmail(sender,receiver,message.as_string())
     server.quit()
-def send_mail_cert(sender,password,receiver,receiver_name,timeslot,subject):
+def send_mail_cert(sender,password,receiver,receiver_name,subject):
     server = smtplib.SMTP_SSL("smtp.gmail.com",465)
     server.login(sender,password)
-    message = MIMEText('Dear ' + receiver_name + ",\n\n" + "You have successfully completed your vaccination. Kindly find attached your certificate")
+    message = MIMEMultipart()
+    text = MIMEText('Dear ' + receiver_name + ",\n\n" + "You have successfully completed your vaccination. Kindly find attached your certificate." + '\n\n'  + "Thank you," + '\n\n\n\n' "AUBCOVAX Team")
+    message.attach(text)
     message['Subject'] = subject
     message['From'] = sender
     message['To'] = receiver
+    directory = receiver_name + " Certificate.pdf"
+    with open(directory, encoding = 'utf-8', errors = 'replace') as opened:
+        openedfile = opened.read()
+        attachedfile = MIMEApplication(openedfile, _subtype = "pdf")
+        attachedfile.add_header('content-disposition', 'attachment', filename = directory)
+        message.attach(attachedfile)
     server.sendmail(sender,receiver,message.as_string())
     server.quit()
 def timeslot_dose():
@@ -88,11 +105,6 @@ def timeslot_dose():
                 return date(day=time["Day"], month=time["Month"], year=time["Year"]).strftime('%A %d %B %Y') + str(" at "+str(time["Hour"]-12)+":"+str(time["Minutes"])+ " "+ time["TimeType"])
     else:
         if(TimeSlots.count_documents({"Day":date_1.day}) < 20):
-            if(TimeSlots.count_documents({"Day":date_1.day}) == 0):
-                time = {"Month":date_1.month,"Day":date_1.day,"Year":date_1.year,"Hour":8,"Minutes":00}
-                TimeSlots.insert_one(time)
-                return date(day=time["Day"], month=time["Month"], year=time["Year"]).strftime('%A %d %B %Y') + str(" at "+ "8:00 AM")
-            else:
                 now = datetime.now(tz_BEY)
                 round = time_ceil(now.hour,now.minute)
                 round = round.split(".")
@@ -195,11 +207,68 @@ def time_ceil(hour,minute):
     elif(30 < minute <= 59):
         rounded_time = str(hour+1)+"."+"00"
     return rounded_time
+def time_floor(hour,minute):
+    if(0<= minute <30):
+        rounded_time = str(hour)+"."+"00"
+    elif(30 <= minute <= 59):
+        rounded_time = str(hour)+"."+"30"
+    return rounded_time
 def compare_time(date1):
     tz_BEY = pytz.timezone('Asia/Beirut') 
     datetime_BEY = datetime.now(tz_BEY)
     datetime_object = datetime.strptime(date1, '%A %d %B %Y at %I:%M %p')
     if(datetime_object.replace(tzinfo=None) < datetime_BEY.replace(tzinfo=None)):
         return "lower"
+    elif(datetime_object.replace(tzinfo=None) == datetime_BEY.replace(tzinfo=None)):
+        return "equal"
     else:
         return "higher"
+#used template from https://www.blog.pythonlibrary.org/2010/03/08/a-simple-step-by-step-reportlab-tutorial/
+def create_pdf(full_name, location, phone_number,Dose1,Dose2):
+
+    doc = SimpleDocTemplate(full_name+" Certificate"+".pdf",pagesize=letter,
+                            rightMargin=72,leftMargin=72,
+                            topMargin=72,bottomMargin=18)
+    Story=[]
+    logo = '/home/takkol2461/aublogo.jpg'
+    magName = "AUBCOVAX Certificate"
+    issueNum = 12
+    subPrice = "99.00"
+    tz_BEY = pytz.timezone('Asia/Beirut') 
+    datetime_BEY = datetime.now(tz_BEY)
+    Date = date(day=datetime_BEY.day, month=datetime_BEY.month, year=datetime_BEY.year).strftime('%A %d %B %Y')
+    address_parts = [location, phone_number]
+    im = Image(logo, 5*inch, 2*inch)
+    Story.append(im)
+    styles=getSampleStyleSheet()
+    styles.add(ParagraphStyle(name='Justify', alignment=TA_JUSTIFY))
+    ptext = '%s' % Date
+    Story.append(Paragraph(ptext, styles["Normal"]))
+    Story.append(Spacer(1, 12))
+    # Create return address
+    ptext = '%s' % full_name
+    Story.append(Paragraph(ptext, styles["Normal"]))       
+    for part in address_parts:
+        ptext = '%s' % part.strip()
+        Story.append(Paragraph(ptext, styles["Normal"]))   
+    Story.append(Spacer(1, 12))
+    ptext = 'Dear %s:' % full_name.split()[0].strip()
+    Story.append(Paragraph(ptext, styles["Normal"]))
+    Story.append(Spacer(1, 12))
+    ptext = 'This is to assert that you have received two doses for COVID19: Dose 1: %s \
+            and Dose 2: %s, and thus, you have successfully completed your vaccination.' % (Dose1,Dose2)
+    Story.append(Paragraph(ptext, styles["Justify"]))
+    Story.append(Spacer(1, 12))
+    ptext = 'Thank you very much for using the AUBCOVAX app.'
+    Story.append(Paragraph(ptext, styles["Justify"]))
+    Story.append(Spacer(1, 12))
+    ptext = 'Sincerely,'
+    Story.append(Paragraph(ptext, styles["Normal"]))
+    Story.append(Spacer(1, 48))
+    ptext = 'AUBCOVAX Team'
+    Story.append(Paragraph(ptext, styles["Normal"]))
+    Story.append(Spacer(1, 12))
+    doc.build(Story)
+def mail(sender,password,receiver,receiver_name,subject,location,Dose1,Dose2,phone_number):
+    create_pdf(receiver_name, location, phone_number,Dose1,Dose2)
+    send_mail_cert(sender,password,receiver,receiver_name,subject)
