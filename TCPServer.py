@@ -1,12 +1,15 @@
 import socket, threading
 import socket
 import os
-from DataBase import savePatient, send_mail_dose1,send_mail_dose2,send_mail_cert, timeslot_dose, compare_time
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
+import pytz
+from datetime import datetime, timedelta,date
+from DataBase import savePatient, send_mail_dose1,send_mail_dose2,send_mail_cert, time_floor,mail,timeslot_dose, compare_time, create_pdf
 from werkzeug.security import generate_password_hash,check_password_hash
 from pymongo import MongoClient
 
 client = MongoClient("mongodb+srv://Admin:admin@aubcovax.h441n.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
-
 DataBase = client["DataBase"]
 MedicalPersonnel = DataBase["Medical Personnel"]
 Patient = DataBase["Patient"]
@@ -73,6 +76,14 @@ class ClientThread(threading.Thread):
                 self.Socket.send(str.encode("Sign Up Successful"))
                 send_mail_dose1("AUBCOVAX@gmail.com","AUBCOVAX123@#", email,fullName,timeslot,"AUBCOVAX Dose 1 Date Confirmation")
         #elif(action=="Forgot Password"): optional/implement later if we still have time
+        elif(action == "Send Certificate"):
+            if(type == "Patient"):
+                username = data[2]
+                user = Patient.find_one({"username": username})
+                if(user["Dose 2"] == "" or compare_time(user["Dose 2"]) == "higher"):
+                    self.Socket.send(str.encode("Certificate Unavailable"))
+                elif(compare_time(user["Dose 2"]) == "lower"):
+                    mail("AUBCOVAX@gmail.com","AUBCOVAX123@#",user["Email"],user["Full name"],"AUBCOVAX Vaccination Certificate",user["Location"],user["Dose 1"],user["Dose 2"],user["Phone Number"])    
         elif(action == "Search"):
             search_object = data[2]
             if(type == "Admin"):
@@ -115,6 +126,11 @@ class ClientThread(threading.Thread):
                 user = Patient.find_one({"Phone Number":search_object})
                 self.Socket.send(str.encode("Full Name: " + user["Full name"] + "\n\n" + "Dose 1: " + user["Dose 1"] + "\n\n"+ "Dose 2: " + user["Dose 2"] + "\n\n" )) 
                 send_mail_dose2("AUBCOVAX@gmail.com","AUBCOVAX123@#", user["Email"],user["Full name"],timeslot,"AUBCOVAX Dose 2 Date Confirmation")
+                tz_BEY = pytz.timezone('Asia/Beirut') 
+                datetime_object = datetime.strptime(timeslot, '%A %d %B %Y at %I:%M %p')
+                time = str(datetime_object.hour) + ":" + str(datetime_object.minute)
+                trigger = CronTrigger(year = datetime_object.year,month = datetime_object.month,day = datetime_object.day,hour = datetime_object.hour,minute = datetime_object.minute,second = "15",timezone = 'Asia/Beirut')
+                scheduler.add_job(mail,trigger = trigger,args=["AUBCOVAX@gmail.com","AUBCOVAX123@#",user["Email"],user["Full name"],"AUBCOVAX Vaccination Certificate",user["Location"],user["Dose 1"],user["Dose 2"],user["Phone Number"]])
         self.Socket.close()
 IP = "0.0.0.0"
 PORT = 3389
@@ -122,6 +138,10 @@ server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 server.bind((IP, PORT))
 print("Server started")
+tz_BEY = pytz.timezone('Asia/Beirut') 
+datetime_BEY = datetime.now(tz_BEY)
+scheduler = BackgroundScheduler()
+scheduler.start()
 print("Waiting for client request..")
 while True:
     server.listen(1)
